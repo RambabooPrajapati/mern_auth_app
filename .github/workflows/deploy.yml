@@ -81,6 +81,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            export NODE_ENV=production
             cd mern_auth_app
             git pull origin main
             docker-compose down
