@@ -20,7 +20,7 @@ jobs:
       - name: ⚙️ Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: 📦 Install Backend Dependencies
         run: |
@@ -81,7 +81,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd mern-auth-app
+            cd mern_auth_app
             git pull origin main
             docker-compose down
             docker-compose up --build -d
