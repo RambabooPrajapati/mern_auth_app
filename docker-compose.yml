@@ -1,15 +1,17 @@
 version: '3'
 services:
-  client:
-    build: ./client
+  frontend:
+    build: ./frontend
+    env_file:
+      - ./frontend/.env
     ports:
       - "3000:4173"
     depends_on:
-      - server
+      - backend
 
-  server:
-    build: ./server
+  backend:
+    build: ./backend
     ports:
       - "5000:5000"
     env_file:
-      - ./server/.env
+      - ./backend/.env
