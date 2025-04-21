@@ -1,35 +1,87 @@
-name: Deploy to EC2
+name: MERN CI/CD Pipeline
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    types: [opened, synchronize, reopened]  
-  
+    branches:
+      - main
 
 jobs:
-  deploy:
+  # -------------------------------
+  # 🧪 JOB 1: Build & Test (Client + Server)
+  # -------------------------------
+  build:
+    name: 🏗️ Build & Test
     runs-on: ubuntu-latest
+
     steps:
-      - name: Connect & Pull Repo on EC2
-        uses: appleboy/ssh-action@v0.1.10
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 📦 Install Server Dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: 📦 Install Client Dependencies
+        run: |
+          cd client
+          npm install
+
+      - name: 🔧 Build Client
+        run: |
+          cd client
+          npm run build
+
+      - name: 🧪 Run Backend Tests
+        run: |
+          cd server
+          npm test || echo "No tests yet"
+
+  # -------------------------------
+  # 📊 JOB 2: SonarQube (Optional)
+  # -------------------------------
+  sonar:
+    name: 📊 SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 📊 Run SonarQube Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+
+  # -------------------------------
+  # 🚀 JOB 3: Deploy to EC2
+  # -------------------------------
+  deploy:
+    name: 🚀 Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 🐳 Deploy via SSH to EC2
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/mern-auth-app
+            cd mern-auth-app
             git pull origin main
+            docker-compose down
             docker-compose up --build -d
-
-  sonarqube:
-    name: SonarQube
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
