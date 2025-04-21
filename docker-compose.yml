@@ -1,24 +1,24 @@
 version: '3.9'
 
 services:
-  server:
-    build: ./server
+  backend:
+    build: ./backend
     ports:
       - "5000:5000"
     env_file:
-      - ./server/.env
+      - ./backend/.env
     volumes:
-      - ./server:/app
+      - ./backend:/app
     restart: always
 
-  client:
-    build: ./client
+  frontend:
+    build: ./frontend
     ports:
       - "3000:3000"
     environment:
       - VITE_API_URL=http://localhost:5000/api
     volumes:
-      - ./client:/app
+      - ./frontend:/app
     depends_on:
-      - server
+      - backend
     restart: always
