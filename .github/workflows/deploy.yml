@@ -39,7 +39,7 @@ jobs:
 
       - name: 🧪 Run Backend Tests
         run: |
-          cd server
+          cd backend
           npm test || echo "No tests yet"
 
   # -------------------------------
