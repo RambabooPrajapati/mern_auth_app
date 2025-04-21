@@ -9,6 +9,7 @@ services:
       - ./backend/.env
     volumes:
       - ./backend:/app
+      - /app/node_modules    # Prevents host from overwriting installed node_modules
     restart: always
 
   frontend:
